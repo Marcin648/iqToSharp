@@ -33,7 +33,7 @@ void usage(){
           "\t[-o output file without .wav extension (default: out)]\n"
           "\t[-s samplerate (default: 2048000 Hz)]\n"
           "\t[-f center frequency (default: 0)]\n"
-          "\t[-z add 1 sec od silence]\n");
+          "\t[-z add 1 sec of silence]\n");
 
   exit(1);
 }
