@@ -48,7 +48,7 @@ int main(int argc, char **argv){
 
   int c;
 
-  while ((c = getopt(argc, argv, "hi:o:s:f:z")) != -1) {
+  while ((c = getopt(argc, argv, "i:o:s:f:z")) != -1) {
     switch(c){
       case 'i':
         inFileName = optarg;
@@ -111,7 +111,7 @@ int main(int argc, char **argv){
   size_t dataSize = 0;
   while(fread(&ctx, sizeof(ctx), 1, f)){
 
-    //processing suff
+    //processing
 
     fwrite(&ctx, sizeof(ctx), 1, fout);
     dataSize += sizeof(ctx);
