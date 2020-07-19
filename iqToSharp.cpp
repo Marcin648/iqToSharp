@@ -31,6 +31,7 @@ void usage(){
           "iqToSharp, an I/Q converter for SDRSharp\n\n"
           "Usage:\t -i input file\n"
           "\t[-o output file without .wav extension (default: out)]\n"
+          "\t[-b buffer size (default: 2048)]\n"
           "\t[-s samplerate (default: 2048000 Hz)]\n"
           "\t[-f center frequency (default: 0)]\n"
           "\t[-z add 1 sec of silence]\n");
@@ -47,6 +48,7 @@ int main(int argc, char **argv){
   bool silence = false;
 
   int c;
+  size_t bufsize = 2048;
 
   while ((c = getopt(argc, argv, "i:o:s:f:z")) != -1) {
     switch(c){
@@ -58,6 +60,9 @@ int main(int argc, char **argv){
         break;
       case 's':
         sampleRate = atoi(optarg);
+        break;
+	  case 'b':
+        bufsize = atoi(optarg);
         break;
       case 'f':
         centerFreq = optarg;
@@ -109,12 +114,13 @@ int main(int argc, char **argv){
   complex<int8_t> ctx;
 
   size_t dataSize = 0;
-  while(fread(&ctx, sizeof(ctx), 1, f)){
+  size_t elemRead = 0;
+  while((elemRead=fread(&ctx, sizeof(ctx), bufsize, f))>0){
 
     //processing
 
-    fwrite(&ctx, sizeof(ctx), 1, fout);
-    dataSize += sizeof(ctx);
+    fwrite(&ctx, sizeof(ctx), elemRead, fout);
+    dataSize += sizeof(ctx)*elemRead;
   }
 
   printf("DONE\n");
