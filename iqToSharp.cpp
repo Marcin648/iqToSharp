@@ -111,15 +111,19 @@ int main(int argc, char **argv){
   fflush(stdout);
   fseek(fout, sizeof(WavHeader), SEEK_SET);
 
-  complex<int8_t> ctx[bufsize];
+  complex<int8_t> *pctx = (complex<int8_t>*)malloc(sizeof(complex<int8_t>)*bufsize);
+  if(pctx == NULL){
+	  puts("out of memory");
+	  return 1;
+  }
 
   size_t dataSize = 0;
   size_t elemRead = 0;
-  while((elemRead=fread(&ctx, sizeof(complex<int8_t>), bufsize, f))>0){
+  while((elemRead=fread(pctx, sizeof(complex<int8_t>), bufsize, f))>0){
 
     //processing
 
-    fwrite(&ctx, sizeof(complex<int8_t>), elemRead, fout);
+    fwrite(pctx, sizeof(complex<int8_t>), elemRead, fout);
     dataSize += sizeof(complex<int8_t>)*elemRead;
   }
 
@@ -130,10 +134,10 @@ int main(int argc, char **argv){
     printf("Write silence...");
     fflush(stdout);
 
-    ctx[0].re = 0; ctx[0].im = 0;
+    pctx->re = 0; pctx->im = 0;
 
     for(uint32_t i = 0; i < sampleRate; i++){
-        fwrite(&ctx, sizeof(complex<int8_t>), 1, fout);
+        fwrite(pctx, sizeof(complex<int8_t>), 1, fout);
         dataSize += sizeof(complex<int8_t>);
     }
 
@@ -158,7 +162,7 @@ int main(int argc, char **argv){
   wav.numChannels = 2;
   wav.sampleRate = sampleRate;
 
-  wav.bitsPerSample = sizeof(ctx[0].re)*8;
+  wav.bitsPerSample = sizeof(pctx->re)*8;
 
   wav.byteRate = wav.sampleRate *
                   wav.numChannels *
@@ -175,5 +179,6 @@ int main(int argc, char **argv){
 
   printf("DONE\n");
   fflush(stdout);
+  free(pctx);
   return 0;
 }
