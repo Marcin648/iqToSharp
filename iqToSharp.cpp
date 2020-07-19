@@ -50,7 +50,7 @@ int main(int argc, char **argv){
   int c;
   size_t bufsize = 2048;
 
-  while ((c = getopt(argc, argv, "i:o:s:f:z")) != -1) {
+  while ((c = getopt(argc, argv, "i:b:o:s:f:z")) != -1) {
     switch(c){
       case 'i':
         inFileName = optarg;
@@ -111,16 +111,16 @@ int main(int argc, char **argv){
   fflush(stdout);
   fseek(fout, sizeof(WavHeader), SEEK_SET);
 
-  complex<int8_t> ctx;
+  complex<int8_t> ctx[bufsize];
 
   size_t dataSize = 0;
   size_t elemRead = 0;
-  while((elemRead=fread(&ctx, sizeof(ctx), bufsize, f))>0){
+  while((elemRead=fread(&ctx, sizeof(complex<int8_t>), bufsize, f))>0){
 
     //processing
 
-    fwrite(&ctx, sizeof(ctx), elemRead, fout);
-    dataSize += sizeof(ctx)*elemRead;
+    fwrite(&ctx, sizeof(complex<int8_t>), elemRead, fout);
+    dataSize += sizeof(complex<int8_t>)*elemRead;
   }
 
   printf("DONE\n");
@@ -130,11 +130,11 @@ int main(int argc, char **argv){
     printf("Write silence...");
     fflush(stdout);
 
-    ctx.re = 0; ctx.im = 0;
+    ctx[0].re = 0; ctx[0].im = 0;
 
     for(uint32_t i = 0; i < sampleRate; i++){
-        fwrite(&ctx, sizeof(ctx), 1, fout);
-        dataSize += sizeof(ctx);
+        fwrite(&ctx, sizeof(complex<int8_t>), 1, fout);
+        dataSize += sizeof(complex<int8_t>);
     }
 
     printf("DONE\n");
@@ -158,7 +158,7 @@ int main(int argc, char **argv){
   wav.numChannels = 2;
   wav.sampleRate = sampleRate;
 
-  wav.bitsPerSample = sizeof(ctx.re)*8;
+  wav.bitsPerSample = sizeof(ctx[0].re)*8;
 
   wav.byteRate = wav.sampleRate *
                   wav.numChannels *
